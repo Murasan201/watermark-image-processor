@@ -86,11 +86,13 @@ def process_images_in_zip(zip_file, text, font_size, position):
     with zipfile.ZipFile(zip_file, 'r') as zip_ref:
         zip_ref.extractall('temp_images')  # 一時ディレクトリ'temp_images'に全てのファイルを展開
 
+    st.write("Processing extracted images...")
     # 新しいZIPファイルを作成するためのBytesIOオブジェクトを用意
     output_zip = BytesIO()
     with zipfile.ZipFile(output_zip, 'w') as zip_out:
         # 一時ディレクトリ内の全ファイルを処理
         for filename in os.listdir('temp_images'):
+            st.write(f"Found file: {filename}")
             file_path = os.path.join('temp_images', filename)  # 各ファイルのフルパスを取得
             file_ext = os.path.splitext(filename)[1].lower()  # 拡張子を小文字で取得
             # 画像ファイルであるかどうかをチェック
@@ -104,7 +106,7 @@ def process_images_in_zip(zip_file, text, font_size, position):
     output_zip.seek(0)
     
     # デバッグ用メッセージ
-    st.write("Processed files:")
+    st.write("Processed files in ZIP:")
     with zipfile.ZipFile(output_zip, 'r') as zip_ref:
         st.write(zip_ref.namelist())
 
@@ -130,4 +132,3 @@ if uploaded_zip is not None:
         file_name="watermarked_images.zip",
         mime="application/zip"
     )
-
