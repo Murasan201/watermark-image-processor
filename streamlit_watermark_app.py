@@ -1,4 +1,3 @@
-
 import streamlit as st
 import zipfile
 from io import BytesIO
@@ -76,6 +75,10 @@ def process_images_in_zip(zip_file, text, font_size, position):
     Returns:
         BytesIO: ウォーターマークが追加された画像を含むZIPファイル
     """
+    # 一時ディレクトリの作成
+    if not os.path.exists('temp_images'):
+        os.makedirs('temp_images')
+    
     # ZIPファイルを一時ディレクトリに解凍
     with zipfile.ZipFile(zip_file, 'r') as zip_ref:
         zip_ref.extractall('temp_images')  # 一時ディレクトリ'temp_images'に全てのファイルを展開
@@ -95,6 +98,12 @@ def process_images_in_zip(zip_file, text, font_size, position):
 
     # 出力ZIPファイルのポインタを先頭にリセット
     output_zip.seek(0)
+    
+    # デバッグ用メッセージ
+    st.write("Processed files:")
+    with zipfile.ZipFile(output_zip, 'r') as zip_ref:
+        st.write(zip_ref.namelist())
+
     return output_zip  # ウォーターマークが追加された画像を含むZIPファイルを返す
 
 # Streamlitインターフェース
