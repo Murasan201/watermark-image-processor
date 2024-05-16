@@ -94,16 +94,17 @@ def process_images_in_zip(zip_file, text, font_size, position):
     output_zip = BytesIO()
     with zipfile.ZipFile(output_zip, 'w') as zip_out:
         # 一時ディレクトリ内の全ファイルを処理
-        for filename in os.listdir('temp_images'):
-            st.write(f"Found file: {filename}")
-            file_path = os.path.join('temp_images', filename)  # 各ファイルのフルパスを取得
-            file_ext = os.path.splitext(filename)[1].lower()  # 拡張子を小文字で取得
-            # 画像ファイルであるかどうかをチェック
-            if os.path.isfile(file_path) and any(file_ext == ext for ext in IMAGE_EXTENSIONS):
-                output_path = os.path.join('temp_images', f"wm_{filename}")  # 出力ファイルパスを設定
-                add_watermark_with_shadow(file_path, output_path, text, font_size, position)  # ウォーターマークを追加
-                zip_out.write(output_path, arcname=f"wm_{filename}")  # 新しいZIPファイルに追加
-                st.write(f"Added {output_path} to ZIP")
+        for root, dirs, files in os.walk('temp_images'):
+            for filename in files:
+                st.write(f"Found file: {filename}")
+                file_path = os.path.join(root, filename)  # 各ファイルのフルパスを取得
+                file_ext = os.path.splitext(filename)[1].lower()  # 拡張子を小文字で取得
+                # 画像ファイルであるかどうかをチェック
+                if os.path.isfile(file_path) and any(file_ext == ext for ext in IMAGE_EXTENSIONS):
+                    output_path = os.path.join(root, f"wm_{filename}")  # 出力ファイルパスを設定
+                    add_watermark_with_shadow(file_path, output_path, text, font_size, position)  # ウォーターマークを追加
+                    zip_out.write(output_path, arcname=f"wm_{filename}")  # 新しいZIPファイルに追加
+                    st.write(f"Added {output_path} to ZIP")
 
     # 出力ZIPファイルのポインタを先頭にリセット
     output_zip.seek(0)
