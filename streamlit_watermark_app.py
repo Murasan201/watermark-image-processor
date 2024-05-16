@@ -26,6 +26,7 @@ def add_watermark_with_shadow(image_path, output_path, text, font_size, position
         font_size (int): ウォーターマークのフォントサイズ
         position (int): ウォーターマークの位置（1=上部、2=中央、3=下部）
     """
+    st.write(f"Processing image: {image_path}")
     with Image.open(image_path).convert("RGBA") as base:
         # 画像をRGBA形式に変換して開く
 
@@ -61,6 +62,7 @@ def add_watermark_with_shadow(image_path, output_path, text, font_size, position
         combined = Image.alpha_composite(base, watermark_layer).convert("RGB")
         # 処理後の画像を保存
         combined.save(output_path, 'JPEG')
+    st.write(f"Saved watermarked image to: {output_path}")
 
 def process_images_in_zip(zip_file, text, font_size, position):
     """
@@ -75,6 +77,7 @@ def process_images_in_zip(zip_file, text, font_size, position):
     Returns:
         BytesIO: ウォーターマークが追加された画像を含むZIPファイル
     """
+    st.write("Extracting ZIP file...")
     # 一時ディレクトリの作成
     if not os.path.exists('temp_images'):
         os.makedirs('temp_images')
@@ -95,6 +98,7 @@ def process_images_in_zip(zip_file, text, font_size, position):
                 output_path = os.path.join('temp_images', f"wm_{filename}")  # 出力ファイルパスを設定
                 add_watermark_with_shadow(file_path, output_path, text, font_size, position)  # ウォーターマークを追加
                 zip_out.write(output_path, arcname=f"wm_{filename}")  # 新しいZIPファイルに追加
+                st.write(f"Added {output_path} to ZIP")
 
     # 出力ZIPファイルのポインタを先頭にリセット
     output_zip.seek(0)
@@ -126,3 +130,4 @@ if uploaded_zip is not None:
         file_name="watermarked_images.zip",
         mime="application/zip"
     )
+
