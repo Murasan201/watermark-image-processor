@@ -86,6 +86,9 @@ def process_images_in_zip(zip_file, text, font_size, position):
     with zipfile.ZipFile(zip_file, 'r') as zip_ref:
         zip_ref.extractall('temp_images')  # 一時ディレクトリ'temp_images'に全てのファイルを展開
 
+    st.write("Files in temporary directory after extraction:")
+    st.write(os.listdir('temp_images'))
+
     st.write("Processing extracted images...")
     # 新しいZIPファイルを作成するためのBytesIOオブジェクトを用意
     output_zip = BytesIO()
