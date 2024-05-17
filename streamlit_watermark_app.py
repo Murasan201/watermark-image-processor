@@ -5,7 +5,7 @@ from PIL import Image, ImageDraw, ImageFont
 import os
 
 # 定数の設定（デフォルト値）
-DEFAULT_FONT_PATH = 'arial.ttf'  # 使用するフォントファイルのパス
+DEFAULT_FONT_PATH = 'Roboto-Regular.ttf'  # 使用するフォントファイルのパス
 DEFAULT_FONT_SIZE = 36  # フォントサイズ
 DEFAULT_WATERMARK_TEXT = 'Sample Watermark'  # ウォーターマークのテキスト
 DEFAULT_WATERMARK_POSITION = 2  # ウォーターマークの位置（1=上部、2=中央、3=下部）
@@ -27,6 +27,11 @@ def add_watermark_with_shadow(image_path, output_path, text, font_size, position
         position (int): ウォーターマークの位置（1=上部、2=中央、3=下部）
     """
     st.write(f"Processing image: {image_path}")
+
+    if not os.path.exists(DEFAULT_FONT_PATH):
+        st.error(f"Font file {DEFAULT_FONT_PATH} not found.")
+        return
+
     with Image.open(image_path).convert("RGBA") as base:
         # 画像をRGBA形式に変換して開く
 
