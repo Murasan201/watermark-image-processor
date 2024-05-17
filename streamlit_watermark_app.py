@@ -1,7 +1,7 @@
 import streamlit as st
 import zipfile
 from io import BytesIO
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, UnidentifiedImageError
 import os
 
 # 定数の設定（デフォルト値）
@@ -32,42 +32,47 @@ def add_watermark_with_shadow(image_path, output_path, text, font_size, position
         st.error(f"Font file {DEFAULT_FONT_PATH} not found.")
         return
 
-    with Image.open(image_path).convert("RGBA") as base:
-        # 画像をRGBA形式に変換して開く
+    try:
+        with Image.open(image_path).convert("RGBA") as base:
+            # 画像をRGBA形式に変換して開く
 
-        # ウォーターマークを追加するための透明レイヤーを作成
-        watermark_layer = Image.new("RGBA", base.size)
-        draw = ImageDraw.Draw(watermark_layer)
-        font = ImageFont.truetype(DEFAULT_FONT_PATH, font_size)
+            # ウォーターマークを追加するための透明レイヤーを作成
+            watermark_layer = Image.new("RGBA", base.size)
+            draw = ImageDraw.Draw(watermark_layer)
+            font = ImageFont.truetype(DEFAULT_FONT_PATH, font_size)
 
-        # テキストのバウンディングボックスからテキストサイズを計算
-        text_bbox = draw.textbbox((0, 0), text, font=font)
-        text_width = text_bbox[2] - text_bbox[0]
-        text_height = text_bbox[3] - text_bbox[1]
+            # テキストのバウンディングボックスからテキストサイズを計算
+            text_bbox = draw.textbbox((0, 0), text, font=font)
+            text_width = text_bbox[2] - text_bbox[0]
+            text_height = text_bbox[3] - text_bbox[1]
 
-        # ウォーターマークの位置を計算
-        if position == 1:
-            pos = ((base.width - text_width) / 2, (base.height / 4) - text_height / 2)
-        elif position == 2:
-            pos = ((base.width - text_width) / 2, (base.height / 2) - text_height / 2)
-        elif position == 3:
-            pos = ((base.width - text_width) / 2, (3 * base.height / 4) - text_height / 2)
+            # ウォーターマークの位置を計算
+            if position == 1:
+                pos = ((base.width - text_width) / 2, (base.height / 4) - text_height / 2)
+            elif position == 2:
+                pos = ((base.width - text_width) / 2, (base.height / 2) - text_height / 2)
+            elif position == 3:
+                pos = ((base.width - text_width) / 2, (3 * base.height / 4) - text_height / 2)
 
-        # 影を描画する場合
-        if DEFAULT_SHADOW_ENABLED:
-            shadow_position = (pos[0] + DEFAULT_SHADOW_OFFSET, pos[1] + DEFAULT_SHADOW_OFFSET)
-            shadow_color = (0, 0, 0, int(255 * DEFAULT_SHADOW_TRANSPARENCY / 100))
-            draw.text(shadow_position, text, font=font, fill=shadow_color)
+            # 影を描画する場合
+            if DEFAULT_SHADOW_ENABLED:
+                shadow_position = (pos[0] + DEFAULT_SHADOW_OFFSET, pos[1] + DEFAULT_SHADOW_OFFSET)
+                shadow_color = (0, 0, 0, int(255 * DEFAULT_SHADOW_TRANSPARENCY / 100))
+                draw.text(shadow_position, text, font=font, fill=shadow_color)
 
-        # メインのテキストを描画
-        text_color = (255, 255, 255, int(255 * DEFAULT_TRANSPARENCY / 100))
-        draw.text(pos, text, font=font, fill=text_color)
+            # メインのテキストを描画
+            text_color = (255, 255, 255, int(255 * DEFAULT_TRANSPARENCY / 100))
+            draw.text(pos, text, font=font, fill=text_color)
 
-        # 透明レイヤーを基本画像に合成し、RGB形式に変換
-        combined = Image.alpha_composite(base, watermark_layer).convert("RGB")
-        # 処理後の画像を保存
-        combined.save(output_path, 'JPEG')
-    st.write(f"Saved watermarked image to: {output_path}")
+            # 透明レイヤーを基本画像に合成し、RGB形式に変換
+            combined = Image.alpha_composite(base, watermark_layer).convert("RGB")
+            # 処理後の画像を保存
+            combined.save(output_path, 'JPEG')
+        st.write(f"Saved watermarked image to: {output_path}")
+    except UnidentifiedImageError:
+        st.error(f"Cannot process image file {image_path}. It might be corrupted or an unsupported format.")
+    except Exception as e:
+        st.error(f"An error occurred while processing the image {image_path}: {str(e)}")
 
 def process_images_in_zip(zip_file, text, font_size, position):
     """
